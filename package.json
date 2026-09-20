@@ -1,0 +1,67 @@
+{
+  "name": "@wjyfst/cesium-grid",
+  "version": "0.1.0",
+  "description": "CesiumJS 亿级独立立体网格图层：真实例化渲染、从相机中心向外分批填充、逐格数据着色与 O(1) 拾取。",
+  "keywords": [
+    "cesium",
+    "cesiumjs",
+    "grid",
+    "instancing",
+    "webgl",
+    "gis",
+    "weather-grid",
+    "3d-grid"
+  ],
+  "type": "module",
+  "license": "MIT",
+  "author": "Wang_Jinyao <wjyzzuer@163.com>",
+  "homepage": "https://github.com/wjyfst/cesium-grid#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wjyfst/cesium-grid.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wjyfst/cesium-grid/issues"
+  },
+  "main": "./src/index.js",
+  "module": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js",
+      "default": "./src/index.js"
+    },
+    "./math": {
+      "types": "./src/gridMath.d.ts",
+      "import": "./src/gridMath.js",
+      "default": "./src/gridMath.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "files": [
+    "src",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "peerDependencies": {
+    "cesium": ">=1.110.0 <2.0.0"
+  },
+  "devDependencies": {
+    "cesium": "1.143.0",
+    "prettier": "3.8.4",
+    "vitest": "^3.2.4"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "format": "prettier --write src/ test/ scripts/",
+    "verify:pack": "node scripts/verify-pack.mjs",
+    "check": "node --check src/index.js && node --check src/gridLayer.js && node --check src/gridMath.js && node --check src/instancedGridPrimitive.js && node --check src/workerFactory.js && node --check src/viewerLifecycle.js && node --check src/defaults.js && node --check src/gridMatrix.worker.js"
+  }
+}

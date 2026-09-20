@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Syntax check
+        run: npm run check
+
+      - name: Unit tests
+        run: npm test
+
+  pack-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # 打包冒烟：验证 exports 映射与内置 Worker 能否被真实打包器识别。
+      # 单测覆盖不到这条路径（vitest 里 cesium 被 mock、Worker 走注入分支），
+      # 一旦坏了用户装完包会静默回退主线程。
+      - name: Verify packaging (Vite build + worker chunk)
+        run: npm run verify:pack
