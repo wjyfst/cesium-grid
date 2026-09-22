@@ -1,6 +1,6 @@
 {
   "name": "@wjyfst/cesium-grid",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "CesiumJS 亿级独立立体网格图层：真实例化渲染、从相机中心向外分批填充、逐格数据着色与 O(1) 拾取。",
   "keywords": [
     "cesium",
@@ -63,6 +63,6 @@
     "test:watch": "vitest",
     "format": "prettier --write src/ test/ scripts/",
     "verify:pack": "node scripts/verify-pack.mjs",
-    "check": "node --check src/index.js && node --check src/gridLayer.js && node --check src/gridMath.js && node --check src/instancedGridPrimitive.js && node --check src/workerFactory.js && node --check src/viewerLifecycle.js && node --check src/defaults.js && node --check src/gridMatrix.worker.js"
+    "check": "node --check src/index.js && node --check src/gridLayer.js && node --check src/gridMath.js && node --check src/polygonGrid.js && node --check src/instancedGridPrimitive.js && node --check src/workerFactory.js && node --check src/viewerLifecycle.js && node --check src/defaults.js && node --check src/gridMatrix.worker.js"
   }
 }

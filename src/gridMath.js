@@ -9,6 +9,17 @@
  *   因此测试与 Node 侧预处理（如预计算矩阵）都不需要 WebGL 或 DOM。
  */
 
+// —— 多边形面内网格生成（纯计算，不依赖 Cesium / Turf）——
+// 独立文件避免本模块（矩阵 / 标架 / 编码）引入几何处理职责；此处统一 re-export，
+// 保持 `/math` 子路径单一入口。polygonGrid.js 反向 import 本模块的
+// createRingFill / isValidLngLat，均为函数调用期使用，ESM 环不产生求值期依赖。
+export {
+  generatePolygonGrid,
+  createPolygonRingFill,
+  isPointInPolygon,
+  normalizePolygonGeometry,
+} from './polygonGrid.js';
+
 /** WGS84 长半轴（米） */
 const WGS84_A = 6378137.0;
 /** WGS84 第一偏心率平方 */

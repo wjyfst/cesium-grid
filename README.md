@@ -122,6 +122,41 @@ while (!fill.isDone()) {
 >
 > 本包的测试通过 `vi.mock('cesium')` 绕开这一点，因此 `gridLayer` 的逻辑在 Node 下仍被完整覆盖。
 
+### 多边形面内网格（纯计算）
+
+矩形入口（`createGridLayer`）只支持 `originLon/originLat/cols/rows` 的矩形范围。要在**任意多边形面**
+（GeoJSON Polygon / MultiPolygon，含洞）内生成指定边长的网格，用 `/math` 的纯计算生成器：
+
+```js
+import { generatePolygonGrid, packCellsMatrices } from '@wjyfst/cesium-grid/math';
+
+// GeoJSON Polygon / MultiPolygon（含洞）；坐标 [经度, 纬度]，经度在前
+const grid = generatePolygonGrid(geojsonPolygon, {
+  cellSize: 0.01, // ≈ 1.1 km
+  layers: 3, // 竖直堆叠 3 层
+  bottomHeight: 0,
+  gridHeight: 30,
+});
+
+// grid.cols / rows 是覆盖面的包围矩形；cells2d 只含面内格（面外格已被剔除）
+// 逐层用该层模型打包矩阵（现有矩阵函数没有 layer 维度）
+const m0 = packCellsMatrices(grid.cells2d, grid.layerModels[0]);
+const m1 = packCellsMatrices(grid.cells2d, grid.layerModels[1]);
+const m2 = packCellsMatrices(grid.cells2d, grid.layerModels[2]);
+```
+
+规则与限制：
+
+- **包含判定基于格中心点**（外环边线算面内、洞边线算面外）：中心在面外的格不会进入 `cells2d`；
+  边界格最多缺半格，不保证面轮廓完全贴合；
+- **多层**：各层 (col,row) 集合相同，第 k 层底高 `bottomHeight + k × gridHeight`。渲染多层网格时按
+  N 层各自 `bottomHeight` 建实例（或 N 个同 bbox 不同 `bottomHeight` 的 `createGridLayer`）；
+  **多层清单不接拾取**；
+- 不支持跨日界线多边形（告警后继续，不拆分）；
+- 本生成器是**预处理入口**，未接入 `createGridLayer`（图层仍是矩形网格）；
+  `createPolygonRingFill(grid, centerCol, centerRow)` 提供「只产面内格」的方环填充，为后续接图层预留；
+- 非法输入（cellSize / layers / 高度 / 几何）一律**抛错**，不静默回退。
+
 ---
 
 ## 渲染方案

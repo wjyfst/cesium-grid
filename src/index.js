@@ -17,6 +17,7 @@
  *
  *   2) 纯计算 —— 不需要 WebGL / DOM，可在 Node、Worker 或数据预处理脚本里跑
  *      import { createRingFill, writeCellModelMatrix, parseCellCode } from '@wjyfst/cesium-grid';
+ *      import { generatePolygonGrid } from '@wjyfst/cesium-grid'; // 多边形面内多层网格生成
  *
  *   3) 高级 —— 直接操作 GPU 实例缓冲的渲染层与生命周期工具
  *      import { createInstancedGridPrimitive, isViewerAlive } from '@wjyfst/cesium-grid';
@@ -55,6 +56,10 @@ export {
   packCellsInstanceMatrices,
   enuFrameFromMatrix,
   createRingFill,
+  generatePolygonGrid,
+  createPolygonRingFill,
+  isPointInPolygon,
+  normalizePolygonGeometry,
 } from './gridMath.js';
 
 // —— 高级：渲染层与生命周期工具 ——

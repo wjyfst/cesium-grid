@@ -3,6 +3,32 @@
 本文件记录本包的所有重要变更。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.2.0] - 2026-09-22
+
+### 新增
+
+- **`src/polygonGrid.js` 纯计算模块**（`/math` 子路径可用，不依赖 Cesium / Turf）：
+  - `generatePolygonGrid(polygon, { cellSize, layers, bottomHeight, gridHeight, originLon?, originLat? })`：
+    在 GeoJSON Polygon / MultiPolygon（含洞）面内生成指定边长的经纬度网格，只保留**格中心点在面内**
+    的格（外环边线算面内、洞边线算面外），并竖直堆叠 `layers` 层（第 k 层底高 =
+    `bottomHeight + k × gridHeight`）。产出 `cells2d`（面内水平格）、`cells3d`（带 layer 下标）
+    与逐层 `layerModels`（可直接喂 `packCellsMatrices` / `writeCellFrame`）。
+  - `createPolygonRingFill(grid, centerCol, centerRow)`：面内方环填充器（只产面内格，种子在面外时
+    自动换到最近的面内格），为后续接入图层的渐进填充预留。
+  - `normalizePolygonGeometry(input)` / `isPointInPolygon(lon, lat, polygons)` 导出复用与测试。
+- **README 增加「多边形面内网格（纯计算）」章节**（中英同步）。
+
+### 变更
+
+- `package.json` 的 `check` 脚本纳入 `src/polygonGrid.js`。
+
+### 边界与限制
+
+- 多边形生成器是**预处理入口**，未接入 `createGridLayer`（图层仍是矩形网格）；多层清单不接拾取。
+- 边界格按中心点判定，最多缺半格；不支持跨日界线多边形（告警不拆分）。
+- 非法输入（cellSize / layers / 高度 / 外环几何）抛错，不静默回退——与图层入口的
+  「回退默认值 + 告警」策略刻意不同。
+
 ## [0.1.0] - 2026-09-18
 
 首个版本。

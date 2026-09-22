@@ -129,6 +129,47 @@ The pure-compute functions are also exported from the main entry
 > This package's tests work around it via `vi.mock('cesium')`, so `gridLayer` logic is still
 > fully covered under Node.
 
+### Polygon-area grid (pure compute)
+
+The rectangular entry (`createGridLayer`) only supports `originLon/originLat/cols/rows` extents.
+To generate a fixed-edge grid inside an **arbitrary polygon** (GeoJSON Polygon / MultiPolygon,
+holes included), use the pure-compute generator in `/math`:
+
+```js
+import { generatePolygonGrid, packCellsMatrices } from '@wjyfst/cesium-grid/math';
+
+// GeoJSON Polygon / MultiPolygon (holes allowed); [lon, lat], longitude first
+const grid = generatePolygonGrid(geojsonPolygon, {
+  cellSize: 0.01, // ≈ 1.1 km
+  layers: 3, // vertically stacked layers
+  bottomHeight: 0,
+  gridHeight: 30,
+});
+
+// grid.cols / rows is the bounding rectangle covering the polygon;
+// cells2d contains only in-polygon cells (out-of-polygon cells are removed)
+// Pack matrices per layer with that layer's model (existing matrix fns have no layer axis)
+const m0 = packCellsMatrices(grid.cells2d, grid.layerModels[0]);
+const m1 = packCellsMatrices(grid.cells2d, grid.layerModels[1]);
+const m2 = packCellsMatrices(grid.cells2d, grid.layerModels[2]);
+```
+
+Rules and limits:
+
+- **Containment is decided by the cell center** (outer-ring edge lines count as inside, hole edge
+  lines count as outside): cells whose center lies outside the polygon never enter `cells2d`;
+  boundary cells may be short by up to half a cell, so the outline is not guaranteed to hug the
+  polygon exactly;
+- **Layers**: every layer shares the same (col,row) set; layer k's bottom elevation is
+  `bottomHeight + k × gridHeight`. Render N layers by instancing the same cells at each layer's
+  `bottomHeight` (or N `createGridLayer`s with the same bbox but different `bottomHeight`);
+  **layered lists are not wired to picking**;
+- Polygons crossing the antimeridian are not supported (warning, no splitting);
+- This generator is a **preprocessing entry point** and is not wired into `createGridLayer`
+  (layers stay rectangular); `createPolygonRingFill(grid, centerCol, centerRow)` provides ring
+  fill that only emits in-polygon cells, reserved for a future layer integration;
+- Invalid input (cellSize / layers / heights / geometry) **throws** — no silent fallback.
+
 ---
 
 ## Rendering strategies
